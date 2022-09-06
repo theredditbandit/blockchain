@@ -1,0 +1,3 @@
+black
+textual
+pytest
