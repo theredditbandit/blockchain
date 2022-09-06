@@ -1,3 +1,5 @@
 black
 textual
 pytest
+Flask
+requests
