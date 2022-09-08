@@ -1,6 +1,6 @@
 import hashlib
 import json
-from time import ctime
+from time import time, ctime
 from uuid import uuid4
 from flask import Flask, jsonify, request
 
@@ -15,6 +15,7 @@ class Manufacturer:
         block = {
             'index': len(self.chain) + 1,
             'date_time': ctime(),
+            "timestamp": time(),
             'transactions': self.current_transactions,
             'proof': proof,
             'previous_hash': previous_hash or self.hash(self.chain[-1])
