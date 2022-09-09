@@ -1,6 +1,9 @@
 import hashlib
 import json
-from time import time
+from time import time, ctime
+from textwrap import dedent
+from uuid import uuid4
+from flask import Flask, jsonify, request
 
 
 class Blockchain(object):
@@ -20,7 +23,8 @@ class Blockchain(object):
         """
         block = {
             "index": len(self.chain) + 1,
-            "timestamp": time(),
+            "timestamp-unix": time(),
+            "datetime" : ctime(),
             "transactions": self.current_transactions,
             "proof": proof,
             "previous_hash": previous_hash or self.hash(self.chain[-1]),
@@ -93,4 +97,4 @@ class Blockchain(object):
     @property
     def last_block(self):
         # returns the last block in the chain
-        pass
+        return self.chain[-1]
