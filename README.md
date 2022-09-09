@@ -2,7 +2,6 @@
 [![CodeQL](https://github.com/theredditbandit/Blockchain/actions/workflows/codeql.yml/badge.svg)](https://github.com/theredditbandit/Blockchain/actions/workflows/codeql.yml)
 [![Python application](https://github.com/theredditbandit/Blockchain/actions/workflows/python-app.yml/badge.svg)](https://github.com/theredditbandit/Blockchain/actions/workflows/python-app.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Codacy Security Scan](https://github.com/theredditbandit/Blockchain/actions/workflows/codacy.yml/badge.svg)](https://github.com/theredditbandit/Blockchain/actions/workflows/codacy.yml)
 # Blockchain
 
 This is a simple implementation of a blockchain built in python.
