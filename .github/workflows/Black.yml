@@ -20,4 +20,4 @@ jobs:
         pip install Black
     - name: Analysing the code with Black
       run: |
-        Black $(git ls-files '*.py')
+        black $(git ls-files '*.py')
