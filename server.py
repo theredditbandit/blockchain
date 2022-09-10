@@ -40,11 +40,11 @@ def setup_server():
 
     @app.route("/transactions/new", methods=["POST"])
     def new_transaction():  # a method for creating transactions
-        content_type = request.headers.get('Content-Type')
-        if content_type == 'application/json':
+        content_type = request.headers.get("Content-Type")
+        if content_type == "application/json":
             values = request.get_json()
         else:
-            return 'Content-Type not supported'
+            return "Content-Type not supported"
         # check that the required fields are in the POSTed data
         required = ["sender", "recipient", "amount"]
         if not all(
@@ -68,5 +68,3 @@ def setup_server():
         return jsonify(response), 200
 
     app.run(host="0.0.0.0", port=5000)
-
-
