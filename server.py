@@ -3,6 +3,12 @@ from flask import Flask, jsonify, request
 from blockchain import Blockchain
 
 # --- Setting up flask to implement blockchain API---#
+def get_values():
+    content_type = request.headers.get("Content-Type")
+    if content_type == "application/json":
+        return request.get_json()
+    else:
+        return "Content-Type not supported"
 
 
 def setup_server():
@@ -24,7 +30,7 @@ def setup_server():
         blockchain.new_transaction(
             sender="0",
             recipient=node_identifier,
-            amount=1,
+            amount="1",
         )
         # Forge the new block by adding it to the chain
         previous_hash = blockchain.hash(last_block)
@@ -65,6 +71,43 @@ def setup_server():
             "chain": blockchain.chain,
             "length": len(blockchain.chain),
         }
+        return jsonify(response), 200
+
+    @app.route("/nodes/register", methods=["POST"])
+    def register_nodes():
+        content_type = request.headers.get("Content-Type")
+        if content_type == "application/json":
+            values = request.get_json()
+        else:
+            return "Content-Type not supported"
+
+        nodes = values.get("nodes")
+        if nodes is None:
+            return "Error: Please supply a valid list of nodes", 400
+        for node in nodes:
+            blockchain.register_node(node)
+
+        response = {
+            "message": "New nodes have been added",
+            "total_nodes": list(blockchain.nodes),
+        }
+
+        return jsonify(response), 201
+
+    @app.route("/nodes/resolve", methods=["GET"])
+    def consensus():
+        replaced = blockchain.resolve_conflicts()
+
+        if replaced:
+            response = {
+                "message": "Our chain was replaced",
+                "new_chain": blockchain.chain,
+            }
+        else:
+            response = {
+                "message": "Our chain is authoritative",
+                "chain": blockchain.chain,
+            }
         return jsonify(response), 200
 
     app.run(host="0.0.0.0", port=5000)
