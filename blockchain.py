@@ -1,5 +1,6 @@
 import hashlib
 import json
+import requests
 from time import time, ctime
 from urllib.parse import urlparse
 
@@ -68,15 +69,45 @@ class Blockchain(object):
             proof += 1
         return proof
 
-    def register_node(self,address):
+    def register_node(self, address):
         """
         Add a new node to the list of nodes
         :param address: <str> Address of a node eg http://127.0.0.1:5001/things/morethings
         :return: None
         """
         parsed_url = urlparse(address)
-        self.nodes.add(parsed_url.netloc) # netloc is  127.0.0.1:5001 part of the url above
+        self.nodes.add(
+            parsed_url.netloc
+        )  # netloc is  127.0.0.1:5001 part of the url above
 
+    def valid_chain(self, chain):
+        """
+        Determine if a given blockchain is valid
+        :param chain: <list> A blockchain
+        :return: <bool> True if valid, False if not
+        """
+
+        last_block = chain[0]
+        current_index = 1
+
+        while current_index < len(chain):
+            block = chain[current_index]
+            print(f"{last_block}")
+            print(f"{block}")
+            print("\n-------------\n")
+
+            # check if the hash of the block is correct
+
+            if block["previous_hash"] != self.hash(last_block):
+                return False
+            # check if proof of work is correct
+            if not self.valid_proof(last_block["proof"], block["proof"]):
+                return False
+
+            last_block = block
+            current_index += 1
+
+            return True
 
     @staticmethod
     def valid_proof(last_proof, proof):
