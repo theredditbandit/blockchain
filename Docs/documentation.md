@@ -3,7 +3,7 @@
 
 Each block has an index , a timestamp in unix time , a list of transactions and the hash of the previous block.
 
-Here is an example of a block in our blockchain.
+Here's an example of a block in our blockchain.
 ```
 block = {
     'index': 1,
