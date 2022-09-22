@@ -1,5 +1,3 @@
-This project references and learns a lot from [Daniel Van Flymen](https://hackernoon.com/u/dvf)
-Do check out the original instructions from [Learn blockchains by building one by @dvf](https://hackernoon.com/learn-blockchains-by-building-one-117428612f46)
 
 # Getting Started
 
@@ -13,7 +11,6 @@ Lets start by understand some basic information about blockchains.
   A hash looks something like this: ==2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824==
   ![Image shows blocks storing the hashes of previous and successive blocks, thus, verifying authenticity](C:\Users\JAHNAVI\Desktop\Project\Blocks&Hashes.jpg)
 
-  4. 
 
 ### What does a block look like
 
