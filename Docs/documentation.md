@@ -173,5 +173,44 @@ class Blockchain(object):
 ```
 
 ### Proof of Work
-Now, proof of work is a core concept of blockchains. The proof of work algorithm is how new blocks are created or _mined_ in the blockchain. The main function of the algorithm is to find a number that is hard to find from outside the network, but easy to verify from inside the network.
+Now, `proof of work` is a core concept of blockchains. The proof of work algorithm is how new blocks are created or _mined_ in the blockchain. The main function of the algorithm is to find a number that is hard to find from outside the network, but easy to verify from inside the network.
+
+The proof of work that is used in this program is rather simple.
+The algorithm finds a number p' such that the hash(pp') contains 4 leading zeros, where p is the previous proof, and p' is the new proof. This is constantly updated whenever new blocks are added to the network.
+
+```
+def proof_of_work(self, last_proof):
+        """
+        :param last_proof: <int>
+        :return: <int>
+        """
+
+        proof = 0
+        while self.valid_proof(last_proof, proof) is False:
+            proof += 1
+
+        return proof
+
+    @staticmethod
+    def valid_proof(last_proof, proof):
+        """
+        Validates the Proof: Does hash(last_proof, proof) contain 4 leading zeroes?
+        :param last_proof: <int> Previous Proof
+        :param proof: <int> Current Proof
+        :return: <bool> True if correct, False if not.
+        """
+
+        guess = f'{last_proof}{proof}'.encode()
+        guess_hash = hashlib.sha256(guess).hexdigest()
+        return guess_hash[:4] == "0000"
+```
+Depending on the difficulty of the proof of work algorithm, we can modify the number of leading zeros.
+
+# Creating an API for our blockchain
+For a beginner, the biggest question right now must be, what is an API?
+API stands for Application-Program Interface.
+Just the way the User Interface connects the user to the computer and makes it easier for the user to access the computer, the API connects two or more software components.
+It is not ment to be used by the general users, but by programmers to efficiently link multiple pieces of software.
+The most important use of API is in Data Abstraction. APIs hide all internat data that the programmer does not need making it a more secure evironment.
+
 
