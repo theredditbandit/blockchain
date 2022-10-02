@@ -25,7 +25,7 @@ block = {
         {
             'sender': "8527147fe1f5426f9dd545de4b27ee00",
             'recipient': "a77f5cdfa2934df3954a5c7c7da5df1f",
-            'amount': 5,
+            'item': 5,
         }
     ],
     'proof': 324984774000,
@@ -79,22 +79,26 @@ Now that we have a base for managing our blockchain, we need a method to help us
 class Blockchain(object):
     ...
     
-    def new_transaction(self, sender, recipient, amount):
+    def new_block(self, proof, previous_hash=None):
         """
-        Creates a new transaction to go into the next mined Block
-        :param sender: <str> Address of the Sender
-        :param recipient: <str> Address of the Recipient
-        :param amount: <int> Amount
-        :return: <int> The index of the Block that will hold this transaction
+        creates a new block and adds it to the chain
+        :param proof: <int> The proof given by the proof of work algorithm
+        :param previous_hash: (optional) <str> Hash of previous block
+        :return: <dict> new block
         """
+        block = {
+            "index": len(self.chain) + 1,
+            "timestamp-unix": time(),
+            "datetime": ctime(),
+            "transactions": self.current_transactions,
+            "proof": proof,
+            "previous_hash": previous_hash or self.hash(self.chain[-1]),
+        }
 
-        self.current_transactions.append({
-            'sender': sender,
-            'recipient': recipient,
-            'amount': amount,
-        })
-
-        return self.last_block['index'] + 1
+        # reset the current list of transactions
+        self.current_transactions = []
+        self.chain.append(block)
+        return block
 ```
 
 Transactions are added to a list and the `new_transaction()` method returns the index of the block. This index is used when the next block is created linking the two blocks in a chain.
@@ -139,18 +143,18 @@ class Blockchain(object):
         self.chain.append(block)
         return block
 
-    def new_transaction(self, sender, recipient, amount):
+    def new_transaction(self, sender, recipient, item):
         """
         Creates a new transaction to go into the next mined Block
         :param sender: <str> Address of the Sender
         :param recipient: <str> Address of the Recipient
-        :param amount: <int> Amount
+        :param item: <int> item
         :return: <int> The index of the Block that will hold this transaction
         """
         self.current_transactions.append({
             'sender': sender,
             'recipient': recipient,
-            'amount': amount,
+            'item': item,
         })
 
         return self.last_block['index'] + 1
@@ -208,9 +212,115 @@ Depending on the difficulty of the proof of work algorithm, we can modify the nu
 
 # Creating an API for our blockchain
 For a beginner, the biggest question right now must be, what is an API?
-API stands for Application-Program Interface.
-Just the way the User Interface connects the user to the computer and makes it easier for the user to access the computer, the API connects two or more software components.
+API stands for Application-Program Interface. Just the way the User Interface connects the user to the computer and makes it easier for the user to access the computer, the API connects two or more software components.
 It is not ment to be used by the general users, but by programmers to efficiently link multiple pieces of software.
+
 The most important use of API is in Data Abstraction. APIs hide all internat data that the programmer does not need making it a more secure evironment.
 
+We’re going to use the Python Flask Framework. It’s a micro-framework and it makes it easy to map endpoints to Python functions. This allows us talk to our blockchain over the web using HTTP requests.
 
+### Setting up our Server
+```
+import hashlib
+import json
+from textwrap import dedent
+from time import time
+from uuid import uuid4
+
+from flask import Flask
+
+
+class Blockchain(object):
+    ...
+
+
+# Instantiate our Node
+app = Flask(__name__)
+
+# Generate a globally unique address for this node
+node_identifier = str(uuid4()).replace('-', '')
+
+# Instantiate the Blockchain
+blockchain = Blockchain()
+
+
+@app.route('/mine', methods=['GET'])
+def mine():
+    return "We'll mine a new Block"
+  
+@app.route('/transactions/new', methods=['POST'])
+def new_transaction():
+    return "We'll add a new transaction"
+
+@app.route('/chain', methods=['GET'])
+def full_chain():
+    response = {
+        'chain': blockchain.chain,
+        'length': len(blockchain.chain),
+    }
+    return jsonify(response), 200
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+```
+In our server code above, we create `/mine`, `/transaction/new` and `/chain` endpoints.
+The `/mine` endpoint works as a GET request.
+The `/trasnaction/new` endpoint works as a POST request.
+The `/chain` endpoint returns the complete blockchain.
+
+We now need to enable new transactions in the network.
+```
+@app.route('/transactions/new', methods=['POST'])
+def new_transaction():
+    values = request.get_json()
+
+    # Check that the required fields are in the POST'ed data
+    required = ['sender', 'recipient', 'item']
+    if not all(k in values for k in required):
+        return 'Missing values', 400
+
+    # Create a new Transaction
+    index = blockchain.new_transaction(values['sender'], values['recipient'], values['item'])
+
+    response = {'message': f'Transaction will be added to Block {index}'}
+    return jsonify(response), 201
+```
+The above code will allow us to register new transactions into the blockchain network. But just registering the code is not enough. We also need to validate it.
+This is where the `/mine` endpoint come into play. The mining endpoint will calculate our proof of work, it will reward the miner and add 1 new transaction, and forge a new block into the blockchain network.
+
+```
+@app.route('/mine', methods=['GET'])
+def mine():
+    # We run the proof of work algorithm to get the next proof...
+    last_block = blockchain.last_block
+    last_proof = last_block['proof']
+    proof = blockchain.proof_of_work(last_proof)
+
+    # We must receive a reward for finding the proof.
+    # The sender is "0" to signify that this node has mined a new coin.
+    blockchain.new_transaction(
+        sender="0",
+        recipient=node_identifier,
+        item=1,
+    )
+
+    # Forge the new Block by adding it to the chain
+    previous_hash = blockchain.hash(last_block)
+    block = blockchain.new_block(proof, previous_hash)
+
+    response = {
+        'message': "New Block Forged",
+        'index': block['index'],
+        'transactions': block['transactions'],
+        'proof': block['proof'],
+        'previous_hash': block['previous_hash'],
+    }
+    return jsonify(response), 200
+```
+At this point we have reached a milestone. Our server interacts and works on the basis of our `blockchain class`
+So now all we need to do is start interacting with the network directly.
+
+# First Look at our Blockchain Network
+```
+
+```
