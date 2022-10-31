@@ -1,4 +1,5 @@
 from uuid import uuid4
+import uuid
 from flask import Flask, jsonify, request
 from blockchain import Blockchain
 
@@ -15,7 +16,8 @@ def setup_server():
     # Instantiate our node
     app = Flask(__name__)
     # Generate a globally unique address for this node using uuid
-    node_identifier = str(uuid4()).replace("-", "")
+    sender_id = str(uuid4()).replace("-","")
+    recipient_id = str(uuid4()).replace("-", "")
     # Instantiate the blockchain
     blockchain = Blockchain()
 
@@ -28,9 +30,9 @@ def setup_server():
         # We must receive a reward for finding the proof.
         # The sender is "0" to signify that this node has mined a new coin.
         blockchain.new_transaction(
-            sender="0",
-            recipient=node_identifier,
-            amount="1",
+            sender=sender_id,
+            recipient=recipient_id,
+            item="Nill",
         )
         # Forge the new block by adding it to the chain
         previous_hash = blockchain.hash(last_block)
@@ -52,7 +54,7 @@ def setup_server():
         else:
             return "Content-Type not supported"
         # check that the required fields are in the POSTed data
-        required = ["sender", "recipient", "amount"]
+        required = ["sender", "recipient", "item"]
         if not all(
             k in values for k in required
         ):  # checks if all the required values are present
@@ -60,7 +62,7 @@ def setup_server():
 
         # create a new transaction
         index = blockchain.new_transaction(
-            values["sender"], values["recipient"], values["amount"]
+            values["sender"], values["recipient"], values["item"]
         )
         response = {"message": f"Transaction will be added to block {index}"}
         return jsonify(response), 201
@@ -111,3 +113,5 @@ def setup_server():
         return jsonify(response), 200
 
     app.run(host="0.0.0.0", port=5000)
+
+setup_server()
